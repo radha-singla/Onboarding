@@ -1,20 +1,30 @@
 require("dotenv").config();
 
 const express = require("express");
+const cors = require("cors");
 const morgan = require("morgan");
 const { connectDb } = require("./db/config");
-const Message = require("./constant/message").en
-
-
+const Message = require("./constant/message").en;
 
 // Initialize Express app
 const app = express();
 
 //Middleware
 app.use(express.json());
+app.use(
+  cors({
+    origin: "*",
+    method: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true,
+  })
+);
 app.use(morgan("dev"));
 app.use(require("./middleware/res"));
 app.use("/api", require("./router"));
+
+app.get("/data", (req, res) => {
+  res.json({ message: "CORS is enabled for all!" });
+});
 
 app.use((error, req, res, next) => {
   console.log(error);
