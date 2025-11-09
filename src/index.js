@@ -26,6 +26,9 @@ app.get("/data", (req, res) => {
   res.json({ message: "CORS is enabled for all!" });
 });
 
+app.get("/", (req, res) => {
+  res.send("Project is live on Render!");
+});
 app.use((error, req, res, next) => {
   console.log(error);
   return res
