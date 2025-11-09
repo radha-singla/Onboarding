@@ -1,10 +1,10 @@
-const { userSignupValidation } = require("../validation/user");
+const { tempUserValidation } = require("../validation/user");
 const {verifySchema} = require("../validation/user")
 const {updateProfileValidation} = require("../validation/user")
 const {loginValidation} = require("../validation/user")
 
 module.exports = {
-  userSignupValidation,
+  tempUserValidation,
   verifySchema,
   updateProfileValidation,
   loginValidation

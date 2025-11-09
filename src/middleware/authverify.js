@@ -10,10 +10,8 @@ module.exports.authverify = async (req, res, next) => {
     if (!token) return res.unAuthorized({ message: "Token not found" });
 
     const decoded = jwt.verify(token, process.env.SECRET_KEY);
-    console.log(decoded);
-    
+
     const userId = decoded?.tokenData?.id;
-    
 
     const blacklisted = await Model.sessions.findOne({ userId });
     if (!blacklisted)

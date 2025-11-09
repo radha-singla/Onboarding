@@ -3,36 +3,41 @@ const Validation = require("../validation");
 const Message = require("../constant/message").en;
 const { sendEmail } = require("../utils/mailer");
 const { createToken } = require("../utils/createToken");
+const {expireDoc} = require("../utils/expires")
+const jwt = require("jsonwebtoken");
 
 module.exports.signup = async (data) => {
   try {
-    const { email, phone, countryCode } = data;
+    const { fullName, gender, password, email, phone, countryCode } = data;
 
-    let otp;
-    if (email) {
-      const finduser1 = await Model.users.findOne({ email });
-      if (finduser1) {
-        throw new Error(Message.THIS_EMAIL_ALREADY_EXIST);
-      }
-      otp = Math.floor(1000 + Math.random() * 9000);
-      console.log(otp);
-      await sendEmail(email, otp);
-    } else if (phone) {
-      const findUser = await Model.users.findOne({ phone });
-      if (findUser) {
-        throw new Error(Message.THIS_PHONENO_ALREADY_EXIST);
-      }
-      otp = 1234;
+    const checkExistinguser = await Model.users.findOne({ email });
+    if (checkExistinguser) {
+      throw new Error(Message.THIS_EMAIL_ALREADY_EXIST);
     }
-    const saveOtp = await Model.otps.create({
+
+    const tempExisting = await Model.tempUser.findOne({ email });
+    if (tempExisting) {
+      await Model.tempUser.deleteOne({ email });
+    }
+
+    const token = await createToken({ email });
+    console.log(token);
+     const expiryTime = expireDoc()
+
+    await Model.tempUser.create({
+      fullName,
+      gender,
       email,
+      password,
       phone,
       countryCode,
-      otp,
+      token,
+      expireAt: expiryTime,
     });
+    await sendEmail(email, token);
 
     return {
-      message: Message.OTP_SEND,
+      message: Message.VERIFICATION_LINK_SENT,
     };
   } catch (error) {
     console.log(error);
@@ -40,45 +45,44 @@ module.exports.signup = async (data) => {
   }
 };
 
-module.exports.verify = async (data) => {
+module.exports.verify = async (token1) => {
   try {
-    const { email, phone, countryCode, password, otp } = data;
+    const decoded = jwt.verify(token1, process.env.SECRET_KEY);
 
-    const identifier = email ? { email } : { phone };
-
-    const findOtp = await Model.otps.findOne(identifier);
-    console.log(findOtp);
-
-    if (!findOtp || findOtp.otp != otp) {
-      throw new Error(Message.INVALID_OTP);
-    }
-
-    const findUser = await Model.users.findOne(identifier);
+    const { email } = decoded.tokenData;
+    const findUser = await Model.users.findOne({ email });
     if (findUser) {
       throw new Error(Message.ALREADY_VERIFIED);
     }
 
+    const tempUser = await Model.tempUser.findOne({ email });
+
+    if (!tempUser) {
+      throw new Error(Message.NO_VERIFICATION_RECORD_FOUND_OR_LINK_EXPIRED);
+    }
+
     const userData = await Model.users.create({
-      email,
-      phone,
-      countryCode,
-      password,
+      fullName: tempUser.fullName,
+      gender: tempUser.gender,
+      email: tempUser.email,
+      password: tempUser.password,
+      phone: tempUser.phone,
+      countryCode: tempUser.countryCode,
+      isVarified: true,
     });
+
+    await Model.tempUser.findByIdAndDelete(tempUser._id);
+
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
     await Model.sessions.create({
       userId: userData._id,
       expiresAt,
-    });
-    const verified = await Model.users.findByIdAndUpdate(userData.id, {
-      $set: email ? { isEmailVerified: true } : { isPhoneNoVerified: true },
     });
 
     const tokenData = {
       id: userData._id,
     };
     const token = await createToken(tokenData);
-
-    await Model.otps.findByIdAndDelete(findOtp._id);
 
     return {
       message: Message.VERIFY_SUCCESSFULLY,

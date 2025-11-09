@@ -4,7 +4,7 @@ const Controller = require("../controller");
 
 module.exports.signup = async (req, res, next) => {
   try {
-    const { error } = validation.userSignupValidation.validate(req.body);
+    const { error } = validation.tempUserValidation.validate(req.body);
     if (error) {
       return res.validationField({ message: error.details[0].message });
     }
@@ -18,11 +18,20 @@ module.exports.signup = async (req, res, next) => {
 
 module.exports.verify = async (req, res, next) => {
   try {
-    const { error } = validation.verifySchema.validate(req.body);
-    if (error) {
-      return res.validationField({ message: error.details[0].message });
+    const { token1 } = req.params;
+    if (!token1) {
+      return res.validationField({ message: "Verification token is required" });
     }
-    const result = await Controller.verify(req.body);
+    const result = await Controller.verify(token1);
+    if (req.headers.accept && req.headers.accept.includes("text/html")) {
+      return res.send(`
+        <div style="text-align:center;margin-top:50px;font-family:sans-serif">
+          <h2> ${result.message}</h2>
+          <p>Your account has been verified successfully.</p>
+          <p><b>Your token:</b> ${result.token}</p>
+        </div>
+      `);
+    }
     return res.success(result);
   } catch (error) {
     console.log(error);

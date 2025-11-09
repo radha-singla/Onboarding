@@ -1,10 +1,9 @@
 const { users } = require("../model/user");
-const {otps} = require("../model/otp")
-const {sessions} = require("../model/session")
+const { sessions } = require("../model/session");
+const { tempUser } = require("../model/tempUser");
 
 module.exports = {
   users,
-  otps,
-  sessions
-  
+  tempUser,
+  sessions,
 };
