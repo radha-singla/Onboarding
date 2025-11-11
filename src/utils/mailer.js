@@ -16,7 +16,7 @@ module.exports.sendEmail = async (to, token) => {
       to: to,
       subject: "verify email ",
       text: `Click the link to verify your email`,
-       html: `
+      html: `
         <div style="font-family: Arial, sans-serif; color: #333;">
           <h2>Email Verification</h2>
           <p>Click the link below to verify your email:</p>

@@ -28,7 +28,6 @@ module.exports.verify = async (req, res, next) => {
         <div style="text-align:center;margin-top:50px;font-family:sans-serif">
           <h2> ${result.message}</h2>
           <p>Your account has been verified successfully.</p>
-          <p><b>Your token:</b> ${result.token}</p>
         </div>
       `);
     }

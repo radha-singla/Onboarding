@@ -1,4 +1,4 @@
-require("dotenv").config();
+require("dotenv").config({ override: true });
 
 const express = require("express");
 const cors = require("cors");
@@ -9,7 +9,7 @@ const Message = require("./constant/message").en;
 // Initialize Express app
 const app = express();
 
-//Middleware
+//Middleware code
 app.use(express.json());
 app.use(
   cors({

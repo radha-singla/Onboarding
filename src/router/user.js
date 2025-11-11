@@ -8,6 +8,6 @@ routes.get("/verify/:token1", userServices.verify);
 routes.post("/updateProfile", authverify, userServices.updateProfile);
 routes.post("/login", userServices.login),
   routes.get("/logout", authverify, userServices.logout),
-  routes.post("/forgot", userServices.forgot);
+  // routes.post("/forgot", userServices.forgot);
 
 module.exports = routes;
