@@ -30,10 +30,6 @@ if (cluster.isPrimary) {
 
   //Middleware code
   app.use(express.json());
-  app.use(morgan("dev"));
-  app.use(require("./middleware/res"));
-  app.use("/api", require("./router"));
-
   app.use(
     cors({
       origin: "http://localhost:3000",
@@ -41,6 +37,11 @@ if (cluster.isPrimary) {
       credentials: true,
     })
   );
+  app.use(morgan("dev"));
+  app.use(require("./middleware/res"));
+  app.use("/api", require("./router"));
+
+  
 
   app.get("/data", (req, res) => {
     res.json({ message: "CORS is enabled for all!" });
