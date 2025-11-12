@@ -13,8 +13,6 @@ if (cluster.isPrimary) {
 
   const numCpus = os.cpus().length;
   console.log(numCpus);
-  
-
 
   for (let i = 0; i < numCpus; i++) {
     cluster.fork();
@@ -38,7 +36,7 @@ if (cluster.isPrimary) {
 
   app.use(
     cors({
-      origin: "*",
+      origin: "http://localhost:3000",
       method: ["GET", "POST", "PUT", "DELETE"],
       credentials: true,
     })
