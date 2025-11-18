@@ -86,3 +86,20 @@ module.exports.loginValidation = joi.object({
 
   
 });
+
+module.exports.forgotValidation = joi.object({
+  email : joi.string().pattern(emailRegex)
+})
+
+module.exports.verifyOtpValidation = joi.object({
+    email : joi.string().pattern(emailRegex).required(),
+    otp : joi.number().required()
+})
+
+module.exports.resetValidation = joi.object({
+      password : joi.string().required(),
+      confirmPassword : joi.string().required()
+
+
+})
+

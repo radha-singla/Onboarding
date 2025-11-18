@@ -81,10 +81,45 @@ module.exports.logout = async (req, res, next) => {
 
 module.exports.forgot = async (req, res, next) => {
   try {
+    const { error } = validation.forgotValidation.validate(req.body);
+    if (error) {
+      return res.validationField({ message: error.details[0].message });
+    }
+    const { email } = req.body;
     const result = await Controller.forgot(req.body);
     return res.success(result);
   } catch (error) {
     console.log(error);
-    throw error;
+    next(error);
+  }
+};
+module.exports.verifyOtp = async (req, res, next) => {
+  try {
+     const { error } = validation.verifyOtpValidation.validate(req.body);
+    if (error) {
+      return res.validationField({ message: error.details[0].message });
+    }
+    const { email, otp } = req.body;
+    const result = await Controller.verifyOtp(req.body);
+    return res.success(result);
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+};
+
+module.exports.resetPassword = async (req, res, next) => {
+  try {
+      const { error } = validation.resetValidation.validate(req.body);
+    if (error) {
+      return res.validationField({ message: error.details[0].message });
+    }
+    const email = req.email
+    const {  password, confirmPassword } = req.body;
+    const result = await Controller.resetPassword(email , req.body);
+    return res.success(result);
+  } catch (error) {
+    console.log(error);
+    next(error);
   }
 };

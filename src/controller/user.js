@@ -1,10 +1,13 @@
 const Model = require("../model");
-const Validation = require("../validation");
 const Message = require("../constant/message").en;
-const { sendEmail } = require("../utils/mailer");
+//const { sendEmail } = require("../utils/mailer");
+// const { sendEmail } = require("../utils/mailer");
+
 const { createToken } = require("../utils/createToken");
-const {expireDoc} = require("../utils/expires")
+const { resetToken } = require("../utils/createToken");
+const { expireDoc } = require("../utils/expires");
 const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
 
 module.exports.signup = async (data) => {
   try {
@@ -21,23 +24,33 @@ module.exports.signup = async (data) => {
     }
 
     const token = await createToken({ email });
-    console.log(token);
-     const expiryTime = expireDoc()
+    const expiryTime = expireDoc();
 
-    await Model.tempUser.create({
+    // await Model.tempUser.create({
+    //   fullName,
+    //   gender,
+    //   email,
+    //   password,
+    //   phone,
+    //   countryCode,
+    //   token,
+    //   expireAt: expiryTime,
+    // });
+    // await sendEmail(email, token);
+
+    await Model.users.create({
       fullName,
       gender,
       email,
       password,
       phone,
       countryCode,
-      token,
-      expireAt: expiryTime,
+      isVerified: true,
     });
-    await sendEmail(email, token);
 
     return {
-      message: Message.VERIFICATION_LINK_SENT,
+      // message: Message.VERIFICATION_LINK_SENT,
+      message : Message.SUCCESS
     };
   } catch (error) {
     console.log(error);
@@ -68,7 +81,7 @@ module.exports.verify = async (token1) => {
       password: tempUser.password,
       phone: tempUser.phone,
       countryCode: tempUser.countryCode,
-      isVarified: true,
+      isVerified: true,
     });
 
     await Model.tempUser.findByIdAndDelete(tempUser._id);
@@ -121,17 +134,21 @@ module.exports.login = async (data) => {
       throw new Error(Message.EMAIL_PASSWORD_INCORRECT);
     }
     if (email) {
-      if (!findUser.isEmailVerified === true) {
+      if (findUser.isVerified !== true) {
         throw new Error(Message.EMAIL_NOT_VERIFIED);
       }
     }
     if (phone) {
-      if (!findUser.isPhoneNoVerified === true) {
+      if (findUser.isPhoneNoVerified !== true) {
         throw new Error(Message.PHONENO_IS_NOT_VERIFIED);
       }
     }
+    console.log(findUser.password);
 
-    const isMatch = await findUser.isPaswordMatch(password);
+    const isMatch = await bcrypt.compare(password, findUser.password);
+
+    console.log(isMatch);
+
     if (!isMatch) {
       throw new Error(Message.EMAIL_PASSWORD_INCORRECT);
     }
@@ -177,32 +194,80 @@ module.exports.logout = async (id) => {
 module.exports.forgot = async (data) => {
   try {
     const { email, phone } = data;
-    const findUser = await Model.users.findOne({ $or: [{ email }, { phone }] });
 
-    let otp;
+    if (!email && !phone) {
+      throw new Error(Message.PLEASE_PROVIDE_EMAIL_OR_PHONENO);
+    }
+    const findUser = await Model.users.findOne({ $or: [{ email }, { phone }] });
+    if (!findUser) {
+      throw new Error(Message.THIS_EMAIL_AS_NO_ACCOUNT);
+    }
+
     if (email) {
-      if (!findUser.isEmailVerified === true) {
+      if (email && findUser && findUser.isVerified !== true) {
         throw new Error(Message.EMAIL_NOT_VERIFIED);
       }
-      otp = Math.floor(1000 + Math.random() * 9000);
-      console.log(otp);
-      await sendEmail(email, otp);
-    } else if (phone) {
-      if (!findUser.isPhoneNoVerified === true) {
-        throw new Error(Message.PHONENO_IS_NOT_VERIFIED);
-      }
-      otp = 1234;
-    } else {
-      throw new Error("Email or phone required");
     }
-    const saveOtp = await Model.otps.create({
-      email,
-      phone,
-      otp,
-    });
+    const otp = 1234;
+    if (findUser) {
+      await Model.otps.create({
+        email,
+        phone,
+        otp,
+      });
+    }
 
     return {
       message: Message.OTP_SEND,
+    };
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+module.exports.verifyOtp = async (data) => {
+  try {
+    const { email, otp } = data;
+    const checkOtp = await Model.otps.findOne({ email, otp });
+
+    if (!checkOtp) {
+      throw new Error(Message.INVALID_OTP);
+    }
+    const tokenData1 = {
+      email: checkOtp.email,
+    };
+    const token1 = await resetToken(tokenData1);
+    await Model.otps.findByIdAndDelete(checkOtp._id);
+
+    return {
+      message: Message.VERIFY_SUCCESSFULLY,
+      token1,
+    };
+  } catch (error) {
+    console.log();
+    throw error;
+  }
+};
+
+module.exports.resetPassword = async (email, data) => {
+  try {
+    const { password, confirmPassword } = data;
+    if (password !== confirmPassword) {
+      throw new Error(Message.PASSWORD_AND_CONFIRMPASSWORD_INCORRECT);
+    }
+    const user = await Model.users.findOne({ email });
+    if (!user) {
+      throw new Error("user not found");
+    }
+    const hashPwd = await bcrypt.hash(password, 10);
+
+    await Model.users.findOneAndUpdate(
+      { email },
+      { $set: { password: hashPwd } }
+    );
+
+    return {
+      message: Message.RESET,
     };
   } catch (error) {
     console.log(error);

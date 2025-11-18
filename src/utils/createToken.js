@@ -5,3 +5,9 @@ module.exports.createToken = (tokenData) => {
   const secret_key = process.env.SECRET_KEY;
   return jwt.sign({ tokenData }, secret_key, { expiresIn });
 };
+
+module.exports.resetToken = (email) => {
+  const expiresIn = "15m";
+  const secret_key = process.env.SECRET_KEY;
+  return jwt.sign({ email }, secret_key, { expiresIn });
+};

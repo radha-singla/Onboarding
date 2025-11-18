@@ -14,5 +14,10 @@ module.exports.en = {
   EMAIL_NOT_VERIFIED: "Email not verified",
   PHONENO_IS_NOT_VERIFIED: "Phone no is not verified",
   VERIFICATION_LINK_SENT: "Verification link sent to your email",
-  NO_VERIFICATION_RECORD_FOUND_OR_LINK_EXPIRED : "No verification record found or link expired"
+  NO_VERIFICATION_RECORD_FOUND_OR_LINK_EXPIRED : "No verification record found or link expired",
+  PLEASE_PROVIDE_EMAIL_OR_PHONENO : "Please provide email or phone no",
+  PASSWORD_AND_CONFIRMPASSWORD_INCORRECT : "Password and confirm password not match",
+  RESET : "Reset successfully",
+  THIS_EMAIL_AS_NO_ACCOUNT : "This email has no account , create new account with this email ",
+  SUCCESS : "Success"
 };

@@ -4,6 +4,8 @@ const {updateProfile} = require("../controller/user")
 const {login} = require("../controller/user")
 const {logout} = require("../controller/user")
 const {forgot} = require("../controller/user")
+const {verifyOtp} = require("../controller/user")
+const {resetPassword} = require("../controller/user")
 
 module.exports ={
     signup,
@@ -11,6 +13,8 @@ module.exports ={
     updateProfile,
     login,
     logout,
-    forgot
+    forgot,
+    verifyOtp,
+    resetPassword
 
 }
