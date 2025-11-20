@@ -114,6 +114,7 @@ module.exports.resetPassword = async (req, res, next) => {
     if (error) {
       return res.validationField({ message: error.details[0].message });
     }
+    
     const email = req.email
     const {  password, confirmPassword } = req.body;
     const result = await Controller.resetPassword(email , req.body);

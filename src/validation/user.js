@@ -99,7 +99,5 @@ module.exports.verifyOtpValidation = joi.object({
 module.exports.resetValidation = joi.object({
       password : joi.string().required(),
       confirmPassword : joi.string().required()
-
-
 })
 

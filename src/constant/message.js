@@ -19,5 +19,6 @@ module.exports.en = {
   PASSWORD_AND_CONFIRMPASSWORD_INCORRECT : "Password and confirm password not match",
   RESET : "Reset successfully",
   THIS_EMAIL_AS_NO_ACCOUNT : "This email has no account , create new account with this email ",
-  SUCCESS : "Success"
+  SUCCESS : "Success",
+  JOB_SEND : "Job scheduled successfully!"
 };

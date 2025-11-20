@@ -1,7 +1,8 @@
 const Model = require("../model");
 const Message = require("../constant/message").en;
 //const { sendEmail } = require("../utils/mailer");
-// const { sendEmail } = require("../utils/mailer");
+const { sendEmail } = require("../utils/mailer");
+const {sendResetEmail} = require("../utils/mailer")
 
 const { createToken } = require("../utils/createToken");
 const { resetToken } = require("../utils/createToken");
@@ -26,31 +27,31 @@ module.exports.signup = async (data) => {
     const token = await createToken({ email });
     const expiryTime = expireDoc();
 
-    // await Model.tempUser.create({
-    //   fullName,
-    //   gender,
-    //   email,
-    //   password,
-    //   phone,
-    //   countryCode,
-    //   token,
-    //   expireAt: expiryTime,
-    // });
-    // await sendEmail(email, token);
-
-    await Model.users.create({
+    await Model.tempUser.create({
       fullName,
       gender,
       email,
       password,
       phone,
       countryCode,
-      isVerified: true,
+      token,
+      expireAt: expiryTime,
     });
+    await sendEmail(email, token);
+
+    // await Model.users.create({
+    //   fullName,
+    //   gender,
+    //   email,
+    //   password,
+    //   phone,
+    //   countryCode,
+    //   isVerified: true,
+    // });
 
     return {
-      // message: Message.VERIFICATION_LINK_SENT,
-      message : Message.SUCCESS
+      message: Message.VERIFICATION_LINK_SENT,
+      // message : Message.SUCCESS
     };
   } catch (error) {
     console.log(error);
@@ -208,17 +209,21 @@ module.exports.forgot = async (data) => {
         throw new Error(Message.EMAIL_NOT_VERIFIED);
       }
     }
-    const otp = 1234;
+    const token = await createToken({ email });
+        await sendResetEmail(email, token);
+        
+
+     const otp = 1234;
     if (findUser) {
       await Model.otps.create({
         email,
         phone,
-        otp,
+        token,
       });
     }
 
     return {
-      message: Message.OTP_SEND,
+      message: Message.VERIFICATION_LINK_SENT
     };
   } catch (error) {
     console.log(error);

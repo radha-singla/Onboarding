@@ -6,8 +6,8 @@ const {logout} = require("../controller/user")
 const {forgot} = require("../controller/user")
 const {verifyOtp} = require("../controller/user")
 const {resetPassword} = require("../controller/user")
-
-module.exports ={
+const {createJobs} = require("../controller/schedule")
+module.exports = { 
     signup,
     verify,
     updateProfile,
@@ -15,6 +15,8 @@ module.exports ={
     logout,
     forgot,
     verifyOtp,
-    resetPassword
+    resetPassword,
+    createJobs
+    
 
 }
